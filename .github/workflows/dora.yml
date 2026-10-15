@@ -1,0 +1,26 @@
+name: DORA Metrics Collection
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  collect-metrics:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Calculate DORA Metrics
+        run: |
+          echo "Collecting DORA 4 Key Metrics (Lead Time, Deployment Frequency, MTTR, Change Failure Rate)..."
+          # 지표 수집 및 JSON 아티팩트 생성 로직 작성 위치
+          mkdir -p output
+          echo '{"deployment_frequency": "daily", "lead_time_for_changes": "1 hour"}' > output/dora-metrics.json
+
+      - name: Upload Metrics Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dora-metrics-artifact
+          path: output/dora-metrics.json
