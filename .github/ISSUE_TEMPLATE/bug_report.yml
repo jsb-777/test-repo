@@ -1,0 +1,9 @@
+name: Bug Report
+description: 버그나 시스템 결함을 신고합니다.
+body:
+  - type: textarea
+    attributes:
+      label: 버그 설명
+      description: 어떤 문제가 발생했나요?
+    validations:
+      required: true
