@@ -29,6 +29,7 @@ pie title DORA Metrics - Deployment Stability
     "Success Deployments (95%)" : 95
     "Change Failures (5%)" : 5
 ```
+<<<<<<< HEAD
 
 
 📊 애자일 스프린트 분석 보고서 (선택 과제)
