@@ -1,0 +1,62 @@
+name: SLA Tracker
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  check-sla:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ensure SLA label exists
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labelName = 'sla-breach';
+            try {
+              await github.rest.issues.getLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: labelName
+              });
+            } catch (err) {
+              if (err.status === 404) {
+                await github.rest.issues.createLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: labelName,
+                  color: 'd93f0b',
+                  description: '응답 기한(SLA) 경과 이슈'
+                });
+              } else {
+                throw err;
+              }
+            }
+
+      - name: Flag open issues without comments after 3 days
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open'
+            });
+
+            for (const issue of issues) {
+              if (issue.pull_request) continue;
+              const createdAt = new Date(issue.created_at);
+              if (createdAt < threeDaysAgo && issue.comments === 0) {
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  labels: ['sla-breach']
+                });
+              }
+            }
